@@ -80,10 +80,22 @@ This project requires zero backend dependencies, framework installations, or com
 
 ## 📁 Project Structure
 
-- `index.html`: The core application container, featuring the nested templates for all pages.
-- `style.css`: Contains the entire cyberpunk styling system.
-- `script.js`: Handles all the frontend UI interactions, form validations, and routing logic.
-- `assets/`: Contains custom image art (the city background and the profile avatar).
+```text
+noen_game/
+├── assets/
+│   ├── avatar.png          # Generated visual for dashboard profile
+│   └── hero_bg.png         # Generated immersive background image
+├── index.html              # The core HTML application & templates 
+├── script.js               # Frontend UI logic, auth logic & routing
+├── style.css               # Implementation of the complete cyberpunk theme
+└── README.md               # Documentation and project details
+```
+
+### Breakdowns
+- **`index.html`**: The core application container, featuring the nested templates for all pages.
+- **`style.css`**: Contains the entire cyberpunk styling system.
+- **`script.js`**: Handles all the frontend UI interactions, form validations, and routing logic.
+- **`assets/`**: Contains custom image art (the city background and the profile avatar).
 
 ## 🎨 UI Preview Highlights
 
