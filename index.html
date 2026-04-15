@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon City Gaming</title>
+    <!-- Modern Cyberpunk Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Audio element for background music -->
+    <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
+
+    <div id="loader" class="loader-container">
+        <div class="loader-ring"></div>
+        <div class="loader-text">LOADING...</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span class="neon-text">NEON</span> CITY
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="nav-link active" data-target="home-page">HOME</a></li>
+            <li><a href="#" class="nav-link" data-target="about-page">ABOUT</a></li>
+            <li id="nav-login"><a href="#" class="nav-link" data-target="login-page">LOGIN</a></li>
+            <li id="nav-register"><a href="#" class="nav-link btn-glow" data-target="register-page">REGISTER</a></li>
+            <li id="nav-dashboard" class="hidden"><a href="#" class="nav-link" data-target="dashboard-page">DASHBOARD</a></li>
+            <li id="nav-logout" class="hidden"><a href="#" id="logout-btn" class="nav-link">LOGOUT</a></li>
+        </ul>
+        <div class="music-toggle">
+            <span id="music-icon">🎵 MUSIC: OFF</span>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main id="main-content">
+        <!-- Home Page -->
+        <section id="home-page" class="page active">
+            <div class="hero-section" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('assets/hero_bg.png');">
+                <div class="hero-content">
+                    <h1 class="glitch-text" data-text="WELCOME TO THE UNDERGROUND">WELCOME TO THE UNDERGROUND</h1>
+                    <p>Enter the city, make your mark, and rise to the top.</p>
+                    <button class="btn-neon large play-now-btn">PLAY NOW</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Page -->
+        <section id="about-page" class="page">
+            <div class="container text-center vh-100 flex-center">
+                <h1 class="neon-text">ABOUT THE CITY</h1>
+                <p>Welcome to the ultimate cyberpunk playground.</p>
+            </div>
+        </section>
+
+        <!-- Login Page -->
+        <section id="login-page" class="page">
+            <div class="form-container">
+                <h2 class="neon-text text-center">ACCESS TERMINAL</h2>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label>USERNAME / EMAIL</label>
+                        <input type="text" id="login-username" required placeholder="Enter your credentials">
+                    </div>
+                    <div class="input-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="login-password" required placeholder="Enter password">
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="remember-me">
+                            <span class="checkmark"></span>
+                            Remember Me
+                        </label>
+                        <a href="#" class="forgot-link">Forgot Password?</a>
+                    </div>
+                    <div id="login-error" class="error-msg"></div>
+                    <button type="submit" class="btn-neon full-width">INITIALIZE LOGIN</button>
+                    <p class="text-center mt-4">Don't have an ID? <a href="#" class="switch-page" data-target="register-page">Register Network</a></p>
+                    <button type="button" class="btn-social google full-width mt-2">LOGIN WITH GOOGLE</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Register Page -->
+        <section id="register-page" class="page">
+            <div class="form-container">
+                <h2 class="neon-text text-center">CREATE ID</h2>
+                <form id="register-form">
+                    <div class="input-group">
+                        <label>USERNAME</label>
+                        <input type="text" id="reg-username" required placeholder="Choose an alias">
+                    </div>
+                    <div class="input-group">
+                        <label>EMAIL</label>
+                        <input type="email" id="reg-email" required placeholder="Enter secure email">
+                    </div>
+                    <div class="input-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="reg-password" required placeholder="Create password">
+                        <div class="password-strength">
+                            <div class="strength-bar"></div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>CONFIRM PASSWORD</label>
+                        <input type="password" id="reg-confirm" required placeholder="Verify password">
+                    </div>
+                    <div id="reg-error" class="error-msg"></div>
+                    <button type="submit" class="btn-neon full-width pt-submit">REGISTER PROTOCOL</button>
+                    <p class="text-center mt-4">Already in the network? <a href="#" class="switch-page" data-target="login-page">Access Terminal</a></p>
+                </form>
+            </div>
+        </section>
+
+        <!-- Dashboard Page -->
+        <section id="dashboard-page" class="page">
+            <div class="dashboard-container">
+                <div class="profile-header">
+                    <img src="assets/avatar.png" alt="Avatar" class="profile-avatar">
+                    <div class="profile-info">
+                        <h2 class="neon-text">WELCOME, <span id="dash-username">USER</span></h2>
+                        <p class="rank">STREET CRED: <span class="highlight">GANGSTER</span></p>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>LEVEL</h3>
+                        <div class="stat-value neon-blue">42</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>COINS</h3>
+                        <div class="stat-value neon-yellow">1,337,000</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>MISSIONS COMPLETED</h3>
+                        <div class="stat-value neon-pink">84</div>
+                    </div>
+                </div>
+
+                <div class="actions-grid mt-4">
+                    <button class="btn-neon large">START MISSION</button>
+                    <button class="btn-neon outline large">GARAGE</button>
+                    <button class="btn-neon outline large">WEAPONS</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js",
+                "firebase/analytics": "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js"
+            }
+        }
+    </script>
+    <script type="module" src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
