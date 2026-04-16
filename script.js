@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginForm.reset();
                 navigateTo('dashboard-page');
             } catch (error) {
-                errorDiv.textContent = 'Invalid security clearance! ' + error.message;
+                errorDiv.textContent = 'Invalid username or password';
                 errorDiv.style.display = 'block';
             }
         });
