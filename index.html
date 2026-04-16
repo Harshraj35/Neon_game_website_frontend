@@ -160,6 +160,16 @@
                     <div class="profile-info">
                         <h2 class="neon-text">WELCOME, <span id="dash-username">USER</span></h2>
                         <p class="rank">STREET CRED: <span class="highlight">GANGSTER</span></p>
+                        
+                        <div class="progress-container mt-2">
+                            <div class="progress-label">
+                                <span>Level 42</span>
+                                <span>65% to Level 43</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill neon-blue-bg" style="width: 65%;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -178,10 +188,51 @@
                     </div>
                 </div>
 
-                <div class="actions-grid mt-4">
+                <div class="dashboard-sections-grid mt-4">
+                    <div class="dashboard-panel">
+                        <h3 class="neon-text mb-3">RECENT ACTIVITY</h3>
+                        <ul class="activity-list">
+                            <li>
+                                <span class="activity-time">2 mins ago</span>
+                                <span class="activity-desc">Completed "Cyber-Bank Heist"</span>
+                                <span class="activity-reward neon-yellow">+50,000</span>
+                            </li>
+                            <li>
+                                <span class="activity-time">1 hour ago</span>
+                                <span class="activity-desc">Purchased "Neon Katana"</span>
+                                <span class="activity-reward text-danger">-12,000</span>
+                            </li>
+                            <li>
+                                <span class="activity-time">3 hours ago</span>
+                                <span class="activity-desc">Won Street Race</span>
+                                <span class="activity-reward neon-blue">+500 XP</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="dashboard-panel">
+                        <h3 class="neon-text mb-3">CURRENT GEAR</h3>
+                        <div class="gear-grid">
+                            <div class="gear-item">
+                                <div class="gear-icon">🚗</div>
+                                <span>Cyber V-Spec</span>
+                            </div>
+                            <div class="gear-item">
+                                <div class="gear-icon">🔫</div>
+                                <span>Plasma Rifle</span>
+                            </div>
+                            <div class="gear-item hide-mobile">
+                                <div class="gear-icon">🛡️</div>
+                                <span>Nano-Armor v2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions-grid mt-4 mb-4">
                     <button class="btn-neon large">START MISSION</button>
                     <button class="btn-neon outline large">GARAGE</button>
-                    <button class="btn-neon outline large">WEAPONS</button>
+                    <button class="btn-neon outline large">BLACK MARKET</button>
                 </div>
             </div>
         </section>
