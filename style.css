@@ -554,7 +554,41 @@ h1, h2, h3, h4 {
     align-items: center;
     min-height: calc(100vh - 80px);
     background: radial-gradient(circle at center, rgba(15, 15, 20, 0.8), #000);
+    position: relative;
+    padding: 20px;
 }
+
+.user-badge {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.mini-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--neon-blue);
+    box-shadow: 0 0 10px var(--neon-blue);
+    object-fit: cover;
+}
+
+.user-status {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
 
 .terminal-container {
     width: 90%;
