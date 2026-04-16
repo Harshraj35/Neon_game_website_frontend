@@ -1,3 +1,14 @@
+import { auth, db } from './firebase-config.js';
+import { 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged,
+    GoogleAuthProvider,
+    signInWithPopup
+} from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Loader Removal
     setTimeout(() => {
@@ -41,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if(!target && link.classList.contains('play-now-btn')) {
                 // Check if user logged in
-                target = localStorage.getItem('gta_user') ? 'dashboard-page' : 'login-page';
+                target = auth.currentUser ? 'dashboard-page' : 'login-page';
             }
             if (target) {
                 e.preventDefault();
@@ -56,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const bgMusic = document.getElementById('bg-music');
     let musicPlaying = false;
 
-    // We set the volume slightly lower so it's not ear-piercing default 1.0
     if (bgMusic) bgMusic.volume = 0.4;
 
     musicToggle.addEventListener('click', () => {
@@ -72,9 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
         musicPlaying = !musicPlaying;
     });
 
-    // 4. Form Validations & Mock Auth
+    // 4. Firebase Authentication Logic
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
+    const googleLoginBtn = document.getElementById('google-login');
     
     // Password Strength Indicator
     const regPassword = document.getElementById('reg-password');
@@ -97,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Register Submit
     if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('reg-username').value;
             const email = document.getElementById('reg-email').value;
@@ -111,58 +122,96 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Mock saving to local storage
-            const user = { username, email, password };
-            localStorage.setItem('gta_user', JSON.stringify(user));
-            
-            errorDiv.style.display = 'none';
-            alert('ID Created Successfully. Proceed to Access Terminal.');
-            registerForm.reset();
-            strengthBar.style.width = '0%';
-            navigateTo('login-page');
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Save extra info to Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    username: username,
+                    email: email,
+                    createdAt: new Date(),
+                    stats: {
+                        level: 1,
+                        coins: 500,
+                        missions: 0
+                    }
+                });
+
+                errorDiv.style.display = 'none';
+                alert('ID Created Successfully. Access matches found.');
+                registerForm.reset();
+                strengthBar.style.width = '0%';
+                navigateTo('dashboard-page');
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            }
         });
     }
 
     // Login Submit
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const identity = document.getElementById('login-username').value;
+            const email = document.getElementById('login-username').value; // Treat as email
             const pass = document.getElementById('login-password').value;
             const errorDiv = document.getElementById('login-error');
             
-            const storedUser = JSON.parse(localStorage.getItem('gta_user'));
-
-            if (!storedUser) {
-                errorDiv.textContent = 'Account not found. Access denied.';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if ((identity === storedUser.username || identity === storedUser.email) && pass === storedUser.password) {
-                // Success
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
                 errorDiv.style.display = 'none';
                 loginForm.reset();
-                updateAuthState();
                 navigateTo('dashboard-page');
-            } else {
-                errorDiv.textContent = 'Invalid security clearance!';
+            } catch (error) {
+                errorDiv.textContent = 'Invalid security clearance! ' + error.message;
                 errorDiv.style.display = 'block';
             }
         });
     }
 
+    // Google Login
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // Check if user exists in Firestore, if not create
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (!userSnap.exists()) {
+                    await setDoc(userRef, {
+                        username: user.displayName || "GUEST_" + user.uid.substring(0, 5),
+                        email: user.email,
+                        createdAt: new Date(),
+                        stats: {
+                            level: 1,
+                            coins: 500,
+                            missions: 0
+                        }
+                    });
+                }
+                navigateTo('dashboard-page');
+            } catch (error) {
+                console.error("Google Auth Error:", error);
+                alert("Neural link failed: " + error.message);
+            }
+        });
+    }
+
     // 5. Auth State Management
-    function updateAuthState() {
-        const user = JSON.parse(localStorage.getItem('gta_user'));
+    function updateUI(user) {
         if (user) {
             if (navLogin) navLogin.classList.add('hidden');
             if (navRegister) navRegister.classList.add('hidden');
             if (navDashboard) navDashboard.classList.remove('hidden');
             if (navLogout) navLogout.classList.remove('hidden');
             
-            const dashUser = document.getElementById('dash-username');
-            if(dashUser) dashUser.textContent = user.username.toUpperCase();
+            // For the dashboard, we need to fetch name from Firestore
+            fetchUserData(user.uid);
         } else {
             if (navLogin) navLogin.classList.remove('hidden');
             if (navRegister) navRegister.classList.remove('hidden');
@@ -171,17 +220,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function fetchUserData(uid) {
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+            const dashUser = document.getElementById('dash-username');
+            if(dashUser) dashUser.textContent = data.username.toUpperCase();
+            
+            // Update stats if they exist
+            if (data.stats) {
+                const levelEl = document.querySelector('.stat-card:nth-child(1) .stat-value');
+                const coinsEl = document.querySelector('.stat-card:nth-child(2) .stat-value');
+                const missionsEl = document.querySelector('.stat-card:nth-child(3) .stat-value');
+                
+                if(levelEl) levelEl.textContent = data.stats.level;
+                if(coinsEl) coinsEl.textContent = data.stats.coins.toLocaleString();
+                if(missionsEl) missionsEl.textContent = data.stats.missions;
+            }
+        }
+    }
+
     // Logout
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
+        logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            localStorage.removeItem('gta_user');
-            updateAuthState();
-            navigateTo('home-page');
+            try {
+                await signOut(auth);
+                navigateTo('home-page');
+            } catch (error) {
+                console.error("Logout failed:", error);
+            }
         });
     }
 
-    // Initial Auth Check
-    updateAuthState();
+    // Listen for Auth State Changes
+    onAuthStateChanged(auth, (user) => {
+        updateUI(user);
+    });
 });
