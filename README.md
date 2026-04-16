@@ -86,6 +86,9 @@ Because this project uses ES6 Modules (`type="module"`), it must be served via a
 
 ```text
 Neon_City_Gaming/
+├── assets/
+│   ├── avatar.png          # Generated visual for dashboard profile
+│   └── hero_bg.png         # Generated immersive background image
 ├── firebase-config.js      # Firebase SDK initialization and credentials
 ├── index.html              # Core HTML structure and page templates
 ├── script.js               # Frontend UI logic, Auth, and Firestore interactions

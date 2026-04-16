@@ -7,7 +7,7 @@ import {
     GoogleAuthProvider,
     signInWithPopup
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, increment } from "firebase/firestore";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Loader Removal
@@ -43,6 +43,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // Notification Helper
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('notification-container');
+        if (!container) return;
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <span>${message}</span>
+            <span style="margin-left: 20px; font-size: 12px; opacity: 0.5;">[OK]</span>
+        `;
+
+        container.appendChild(notification);
+
+        // Auto remove from DOM after animation finishes
+        setTimeout(() => {
+            notification.remove();
+        }, 4500);
+    }
+
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -233,13 +254,101 @@ document.addEventListener('DOMContentLoaded', () => {
                 const levelEl = document.querySelector('.stat-card:nth-child(1) .stat-value');
                 const coinsEl = document.querySelector('.stat-card:nth-child(2) .stat-value');
                 const missionsEl = document.querySelector('.stat-card:nth-child(3) .stat-value');
+                const dashUser = document.getElementById('dash-username');
                 
+                if(dashUser) dashUser.textContent = data.username.toUpperCase();
                 if(levelEl) levelEl.textContent = data.stats.level;
                 if(coinsEl) coinsEl.textContent = data.stats.coins.toLocaleString();
                 if(missionsEl) missionsEl.textContent = data.stats.missions;
+                
+                // Update progress bar based on level progress (simulated)
+                const progressFill = document.querySelector('.progress-fill');
+                const progressLabel = document.querySelector('.progress-label span:last-child');
+                const levelLabel = document.querySelector('.progress-label span:first-child');
+                
+                if (levelLabel) levelLabel.textContent = `Level ${data.stats.level}`;
+                
+                // Randomish progress just for show
+                const progress = (data.stats.missions % 10) * 10 || 5; 
+                if (progressFill) progressFill.style.width = `${progress}%`;
+                if (progressLabel) progressLabel.textContent = `${progress}% to Level ${data.stats.level + 1}`;
             }
         }
     }
+
+    // 6. Game Action Buttons
+    const startMissionBtn = document.getElementById('start-mission-btn');
+    const garageBtn = document.getElementById('garage-btn');
+    const blackMarketBtn = document.getElementById('black-market-btn');
+
+    if (startMissionBtn) {
+        startMissionBtn.addEventListener('click', async () => {
+            if (!auth.currentUser) return;
+            
+            startMissionBtn.disabled = true;
+            startMissionBtn.innerText = 'INITIALIZING...';
+            
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                
+                // Reward: +1 mission, +5000 coins, maybe a level up every 5 missions
+                await updateDoc(userRef, {
+                    "stats.missions": increment(1),
+                    "stats.coins": increment(5000)
+                });
+                
+                // Check if we should level up
+                const userSnap = await getDoc(userRef);
+                const stats = userSnap.data().stats;
+                if (stats.missions % 5 === 0) {
+                    await updateDoc(userRef, {
+                        "stats.level": increment(1)
+                    });
+                    showNotification("LEVEL UP! NEW ABILITIES UNLOCKED.", "success");
+                }
+                
+                showNotification("MISSION COMPLETE! EARNED 5,000 COINS.", "success");
+                await fetchUserData(auth.currentUser.uid);
+            } catch (error) {
+                console.error("Mission failed:", error);
+                showNotification("NEURAL LINK ERROR!", "danger");
+            } finally {
+                startMissionBtn.disabled = false;
+                startMissionBtn.innerText = 'START MISSION';
+            }
+        });
+    }
+
+    if (garageBtn) {
+        garageBtn.addEventListener('click', () => {
+            showNotification("GARAGE ACCESS DENIED: REPUTATION TOO LOW.", "warning");
+        });
+    }
+
+    if (blackMarketBtn) {
+        blackMarketBtn.addEventListener('click', async () => {
+            if (!auth.currentUser) return;
+            
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            const coins = userSnap.data().stats.coins;
+            
+            if (coins >= 10000) {
+                try {
+                    await updateDoc(userRef, {
+                        "stats.coins": increment(-10000)
+                    });
+                    showNotification("PURCHASED ILLEGAL MODS. -10,000 COINS.", "danger");
+                    await fetchUserData(auth.currentUser.uid);
+                } catch (error) {
+                    showNotification("TRANSACTION FAILED.", "danger");
+                }
+            } else {
+                showNotification("INSUFFICIENT FUNDS.", "warning");
+            }
+        });
+    }
+
 
     // Logout
     const logoutBtn = document.getElementById('logout-btn');
